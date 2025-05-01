@@ -45,9 +45,31 @@ write.csv(count_data,
 saveRDS(count_data, file = "count_data.rds")
 count_data <- readRDS("count_data.rds")
 
+#-------------------------------run-first-DESeq2--------------------------------
+#metadata table, defining conditions
+sample_info <- data.frame(
+  sample = colnames(count_data),
+  condition = factor(c(rep("treated", 4), rep("untreated", 4)),
+                     levels = c("untreated", "treated"))  
+)
+rownames(sample_info) <- sample_info$sample
+sample_info$sample <- NULL
+
+#create DESeqDataSet
+dds <- DESeqDataSetFromMatrix(countData = count_data, 
+                              colData = sample_info, 
+                              design = ~ condition)
+dds
+
+#run DESeq2
+dds <- DESeq(dds)
+
+#dispersion estimates, save as 'Dispersion Plot 1'
+plotDispEsts(dds) 
 
 #-------------------------------PCA-and-cleaning--------------------------------
 vsd <- vst(dds, blind = FALSE)
+#create PCA plot, save as 'PCA Plot 1'
 pca_data <- plotPCA(vsd, intgroup = "condition", returnData = TRUE)
 pca_data
 
@@ -92,10 +114,12 @@ dds_filtered <- DESeqDataSetFromMatrix(
 )
 dds_filtered <- DESeq(dds_filtered)
 
-#run PCA again to check
+#run PCA again to check, save as 'PCA Plot 2'
 vsd_filtered <- vst(dds_filtered, blind = FALSE)
 plotPCA(vsd_filtered, intgroup = "condition")
 
+#dispersion estimates, save as 'Dispersion Plot 2'
+plotDispEsts(dds_filtered) 
 #------------------------------clean-results------------------------------------
 #create clean and filtered DESeq object
 res_filtered <- results(dds_filtered)
