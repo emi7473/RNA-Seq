@@ -1,0 +1,15 @@
+# after downlaoding FastQC from: https://www.bioinformatics.babraham.ac.uk/projects/fastqc/
+
+# cd to folder where .fastq.gz files are stored
+# make new folder to store quality reports
+mkdir -p qc
+
+# run fastqc on all files at once (check for enough ram first)
+fastqc raw_fastq/*.fastq.gz -o qc/ -t 4
+# open qc folder, reports are stored in .html files
+
+# optional: summarise one big report for all files together
+pip install multiqc
+multiqc . -o ./multiqc_output
+
+# all done :) 
