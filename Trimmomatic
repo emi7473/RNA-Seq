@@ -1,12 +1,26 @@
-# download Trimmomatic from: http://www.usadellab.org/cms/?page=trimmomatic
-# download the 'binary' version
+#download trimmomatic through bioconda
+conda install bioconda::trimmomatic
 
-java -jar /home/flylab-ubuntu/Downloads/Trimmomatic-0.39/trimmomatic-0.39.jar \
-PE \
--phred33 \
--threads 4 \
-/home/flylab-ubuntu/RNASeq/RNAEmily/fastq/1_R1_001.fastq.gz /home/flylab-ubuntu/RNASeq/RNAEmily/fastq/1_R2_001.fastq.gz \
-/home/flylab-ubuntu/RNASeq/RNAEmily/fastq/trimmed/1_R1_paired.fastq.gz /home/flylab-ubuntu/RNASeq/RNAEmily/fastq/1_R1_unapired.fastq.gz \
-/home/flylab-ubuntu/RNASeq/RNAEmily/fastq/trimmed/1_R2_paired.fastq.gz /home/flylab-ubuntu/RNASeq/RNAEmily/fastq/1_R2_unapired.fastq.gz \
-ILLUMINACLIP:/home/flylab-ubuntu/Downloads/Trimmomatic-0.39/adapters/TruSeq3-PE.fa:2:30:10 \
-LEADING: 3 TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:36
+#sample 1 
+java -Xmx8G -jar trimmomatic-0.39.jar PE -threads 4 1_R1_001.fastq.gz 1_R2_001.fastq.gz 1_R1_001_trimmed_paired.fastq.gz 1_R1_001_forward_unpaired.fastq.gz 1_R2_001_trimmed_paired.fastq.gz 1_R2_001_reverse_unpaired.fastq.gz ILLUMINACLIP:TruSeq3-PE.fa:2:30:10 LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:36
+
+#sample 2
+java -Xmx8G -jar trimmomatic-0.39.jar PE -threads 4 1_R2_001.fastq.gz 2_R2_001.fastq.gz 2_R1_001_trimmed_paired.fastq.gz 2_R1_001_forward_unpaired.fastq.gz 2_R2_001_trimmed_paired.fastq.gz 2_R2_001_reverse_unpaired.fastq.gz ILLUMINACLIP:TruSeq3-PE.fa:2:30:10 LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:36
+
+#sample 3
+java -Xmx8G -jar trimmomatic-0.39.jar PE -threads 4 3_R1_001.fastq.gz 3_R2_001.fastq.gz 3_R1_001_trimmed_paired.fastq.gz 3_R1_001_forward_unpaired.fastq.gz 3_R2_001_trimmed_paired.fastq.gz 3_R2_001_reverse_unpaired.fastq.gz ILLUMINACLIP:TruSeq3-PE.fa:2:30:10 LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:36
+
+#sample 4
+java -Xmx8G -jar trimmomatic-0.39.jar PE -threads 4 1_R1_001.fastq.gz 4_R2_001.fastq.gz 4_R1_001_trimmed_paired.fastq.gz 4_R1_001_forward_unpaired.fastq.gz 4_R2_001_trimmed_paired.fastq.gz 4_R2_001_reverse_unpaired.fastq.gz ILLUMINACLIP:TruSeq3-PE.fa:2:30:10 LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:36
+
+#sample 5
+java -Xmx8G -jar trimmomatic-0.39.jar PE -threads 4 5_R1_001.fastq.gz 5_R2_001.fastq.gz 5_R1_001_trimmed_paired.fastq.gz 5_R1_001_forward_unpaired.fastq.gz 5_R2_001_trimmed_paired.fastq.gz 5_R2_001_reverse_unpaired.fastq.gz ILLUMINACLIP:TruSeq3-PE.fa:2:30:10 LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:36
+
+#sample 6
+java -Xmx8G -jar trimmomatic-0.39.jar PE -threads 4 6_R1_001.fastq.gz 6_R2_001.fastq.gz 6_R1_001_trimmed_paired.fastq.gz 6_R1_001_forward_unpaired.fastq.gz 6_R2_001_trimmed_paired.fastq.gz 6_R2_001_reverse_unpaired.fastq.gz ILLUMINACLIP:TruSeq3-PE.fa:2:30:10 LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:36
+
+#sample 7
+java -Xmx8G -jar trimmomatic-0.39.jar PE -threads 4 7_R1_001.fastq.gz 7_R2_001.fastq.gz 7_R1_001_trimmed_paired.fastq.gz 7_R1_001_forward_unpaired.fastq.gz 7_R2_001_trimmed_paired.fastq.gz 7_R2_001_reverse_unpaired.fastq.gz ILLUMINACLIP:TruSeq3-PE.fa:2:30:10 LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:36
+
+#sample 8
+java -Xmx8G -jar trimmomatic-0.39.jar PE -threads 4 8_R1_001.fastq.gz 8_R2_001.fastq.gz 8_R1_001_trimmed_paired.fastq.gz 8_R1_001_forward_unpaired.fastq.gz 8_R2_001_trimmed_paired.fastq.gz 8_R2_001_reverse_unpaired.fastq.gz ILLUMINACLIP:TruSeq3-PE.fa:2:30:10 LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:36
