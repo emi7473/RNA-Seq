@@ -24,3 +24,7 @@ java -Xmx8G -jar trimmomatic-0.39.jar PE -threads 4 7_R1_001.fastq.gz 7_R2_001.f
 
 #sample 8
 java -Xmx8G -jar trimmomatic-0.39.jar PE -threads 4 8_R1_001.fastq.gz 8_R2_001.fastq.gz 8_R1_001_trimmed_paired.fastq.gz 8_R1_001_forward_unpaired.fastq.gz 8_R2_001_trimmed_paired.fastq.gz 8_R2_001_reverse_unpaired.fastq.gz ILLUMINACLIP:TruSeq3-PE.fa:2:30:10 LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:36
+
+
+#once done, run fastqc on trimmed files (paired)
+fastqc *.fastq.gz
