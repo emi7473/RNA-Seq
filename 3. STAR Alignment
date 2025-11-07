@@ -5,3 +5,29 @@
 #unzip files and put in working directory
 
 STAR --runThreadN 8 --runMode genomeGenerate --genomeDir ./dmel_genome_index --genomeFastaFiles Drosophila_melanogaster.BDGP6.54.dna.toplevel.fa --sjdbGTFfile Drosophila_melanogaster.BDGP6.54.115.gtf --sjdbOverhang 150 --genomeSAindexNbases 12
+
+#then map the reads:
+
+#sample 1
+STAR --runThreadN 8 --genomeDir ./dmel_genome_index --readFilesIn 1_R1_001_trimmed_paired.fastq.gz 1_R2_001_trimmed_paired.fastq.gz --readFilesCommand zcat --outFileNamePrefix 1_ --outSAMtype BAM SortedByCoordinate
+
+#sample 2
+STAR --runThreadN 8 --genomeDir ./dmel_genome_index --readFilesIn 2_R1_001_trimmed_paired.fastq.gz 2_R2_001_trimmed_paired.fastq.gz --readFilesCommand zcat --outFileNamePrefix 2_ --outSAMtype BAM SortedByCoordinate
+
+#sample 3
+STAR --runThreadN 8 --genomeDir ./dmel_genome_index --readFilesIn 3_R1_001_trimmed_paired.fastq.gz 3_R2_001_trimmed_paired.fastq.gz --readFilesCommand zcat --outFileNamePrefix 3_ --outSAMtype BAM SortedByCoordinate
+
+#sample 4
+STAR --runThreadN 8 --genomeDir ./dmel_genome_index --readFilesIn 4_R1_001_trimmed_paired.fastq.gz 4_R2_001_trimmed_paired.fastq.gz --readFilesCommand zcat --outFileNamePrefix 4_ --outSAMtype BAM SortedByCoordinate
+
+#sample 5
+STAR --runThreadN 8 --genomeDir ./dmel_genome_index --readFilesIn 5_R1_001_trimmed_paired.fastq.gz 5_R2_001_trimmed_paired.fastq.gz --readFilesCommand zcat --outFileNamePrefix 5_ --outSAMtype BAM SortedByCoordinate
+
+#sample 6
+STAR --runThreadN 8 --genomeDir ./dmel_genome_index --readFilesIn 6_R1_001_trimmed_paired.fastq.gz 6_R2_001_trimmed_paired.fastq.gz --readFilesCommand zcat --outFileNamePrefix 6_ --outSAMtype BAM SortedByCoordinate
+
+#sample 7
+STAR --runThreadN 8 --genomeDir ./dmel_genome_index --readFilesIn 7_R1_001_trimmed_paired.fastq.gz 7_R2_001_trimmed_paired.fastq.gz --readFilesCommand zcat --outFileNamePrefix 7_ --outSAMtype BAM SortedByCoordinate
+
+#sample 8
+STAR --runThreadN 8 --genomeDir ./dmel_genome_index --readFilesIn 8_R1_001_trimmed_paired.fastq.gz 8_R2_001_trimmed_paired.fastq.gz --readFilesCommand zcat --outFileNamePrefix 8_ --outSAMtype BAM SortedByCoordinate
