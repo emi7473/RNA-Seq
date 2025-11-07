@@ -27,4 +27,5 @@ java -Xmx8G -jar trimmomatic-0.39.jar PE -threads 4 8_R1_001.fastq.gz 8_R2_001.f
 
 
 #once done, run fastqc on trimmed files (paired)
-fastqc *.fastq.gz
+mkdir -p qc_trimmed
+fastqc *.fastq.gz -o ../qc_trimmed -t 4
