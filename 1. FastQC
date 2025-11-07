@@ -5,7 +5,7 @@
 mkdir -p qc
 
 # run fastqc on all files at once (check for enough ram first)
-fastqc raw_fastq/*.fastq.gz -o qc/ -t 4
+fastqc *.fastq.gz -o ../qc -t 4
 # open qc folder, reports are stored in .html files
 
 # optional: summarise one big report for all files together
