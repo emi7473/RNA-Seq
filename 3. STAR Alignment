@@ -1,1 +1,7 @@
+#build reference genome
+#download files here: https://ftp.ensembl.org/pub/release-110/fasta/drosophila_melanogaster/dna/Drosophila_melanogaster.BDGP6.46.dna.toplevel.fa.gz 
+#https://ftp.ensembl.org/pub/release-115/gtf/drosophila_melanogaster/Drosophila_melanogaster.BDGP6.54.115.gtf.gz 
 
+#unzip files and put in working directory
+
+STAR --runThreadN 8 --runMode genomeGenerate --genomeDir ./dmel_genome_index --genomeFastaFiles Drosophila_melanogaster.BDGP6.54.dna.toplevel.fa --sjdbGTFfile Drosophila_melanogaster.BDGP6.54.115.gtf --sjdbOverhang 150 --genomeSAindexNbases 12
