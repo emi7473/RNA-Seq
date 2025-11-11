@@ -5,7 +5,7 @@ conda install bioconda::trimmomatic
 java -Xmx8G -jar trimmomatic-0.39.jar PE -threads 4 1_R1_001.fastq.gz 1_R2_001.fastq.gz 1_R1_001_trimmed_paired.fastq.gz 1_R1_001_forward_unpaired.fastq.gz 1_R2_001_trimmed_paired.fastq.gz 1_R2_001_reverse_unpaired.fastq.gz ILLUMINACLIP:TruSeq3-PE.fa:2:30:10 LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:36
 
 #sample 2
-java -Xmx8G -jar trimmomatic-0.39.jar PE -threads 4 2_R2_001.fastq.gz 2_R2_001.fastq.gz 2_R1_001_trimmed_paired.fastq.gz 2_R1_001_forward_unpaired.fastq.gz 2_R2_001_trimmed_paired.fastq.gz 2_R2_001_reverse_unpaired.fastq.gz ILLUMINACLIP:TruSeq3-PE.fa:2:30:10 LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:36
+java -Xmx8G -jar trimmomatic-0.39.jar PE -threads 4 2_R1_001.fastq.gz 2_R2_001.fastq.gz 2_R1_001_trimmed_paired.fastq.gz 2_R1_001_forward_unpaired.fastq.gz 2_R2_001_trimmed_paired.fastq.gz 2_R2_001_reverse_unpaired.fastq.gz ILLUMINACLIP:TruSeq3-PE.fa:2:30:10 LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:36
 
 #sample 3
 java -Xmx8G -jar trimmomatic-0.39.jar PE -threads 4 3_R1_001.fastq.gz 3_R2_001.fastq.gz 3_R1_001_trimmed_paired.fastq.gz 3_R1_001_forward_unpaired.fastq.gz 3_R2_001_trimmed_paired.fastq.gz 3_R2_001_reverse_unpaired.fastq.gz ILLUMINACLIP:TruSeq3-PE.fa:2:30:10 LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:36
