@@ -1,0 +1,65 @@
+#convert .bam files to .bw
+
+#sample 1
+bamCoverage \
+    -b 1.bam \
+    -o 1.bw \
+    --normalizeUsing CPM \
+    --binSize 25 \
+    --extendReads
+
+#sample 2
+bamCoverage \
+    -b 2.bam \
+    -o 2.bw \
+    --normalizeUsing CPM \
+    --binSize 25 \
+    --extendReads
+
+#sample 3
+bamCoverage \
+    -b 3.bam \
+    -o 3.bw \
+    --normalizeUsing CPM \
+    --binSize 25 \
+    --extendReads
+
+#sample 4
+bamCoverage \
+    -b 4.bam \
+    -o 4.bw \
+    --normalizeUsing CPM \
+    --binSize 25 \
+    --extendReads
+
+#sample 5
+bamCoverage \
+    -b 5.bam \
+    -o 5.bw \
+    --normalizeUsing CPM \
+    --binSize 25 \
+    --extendReads
+
+#sample 6
+bamCoverage \
+    -b 6.bam \
+    -o 6.bw \
+    --normalizeUsing CPM \
+    --binSize 25 \
+    --extendReads
+
+#sample 7
+bamCoverage \
+    -b 7.bam \
+    -o 7.bw \
+    --normalizeUsing CPM \
+    --binSize 25 \
+    --extendReads
+
+#sample 8
+bamCoverage \
+    -b 8.bam \
+    -o 8.bw \
+    --normalizeUsing CPM \
+    --binSize 25 \
+    --extendReads
