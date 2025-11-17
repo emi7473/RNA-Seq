@@ -1,3 +1,11 @@
+#install DeepTools
+
+conda install -c conda-forge -c bioconda deeptools
+
+#or
+
+pip install deeptools
+
 #convert .bam files to .bw
 
 #sample 1
