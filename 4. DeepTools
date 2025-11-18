@@ -6,6 +6,9 @@ conda install -c conda-forge -c bioconda deeptools
 
 pip install deeptools
 
+#make sure to have .bai index files before proceeding
+samtools index 1.bam
+
 #convert .bam files to .bw
 
 #sample 1
@@ -16,58 +19,32 @@ bamCoverage \
     --binSize 25 \
     --extendReads
 
-#sample 2
-bamCoverage \
-    -b 2.bam \
-    -o 2.bw \
+#or all at once:
+mkdir -p bigwigs
+for b in sample*.bam; do
+  out=bigwigs/$(basename ${b%.bam}.bw)
+  bamCoverage -b $b -o $out \
     --normalizeUsing CPM \
-    --binSize 25 \
-    --extendReads
+    --binSize 50 \
+    --effectiveGenomeSize 2913022398 \
+    --extendReads --centerReads \
+    --numberOfProcessors 4
+done
 
-#sample 3
-bamCoverage \
-    -b 3.bam \
-    -o 3.bw \
-    --normalizeUsing CPM \
-    --binSize 25 \
-    --extendReads
 
-#sample 4
-bamCoverage \
-    -b 4.bam \
-    -o 4.bw \
-    --normalizeUsing CPM \
-    --binSize 25 \
-    --extendReads
+multiBamSummary bins \
+  --bamfiles 1.bam 2.bam 3.bam 4.bam 5.bam 6.bam 7.bam 8.bam \
+  --binSize 10000 \
+  --outFileName results/bam_summary_10kb.npz \
+  --outRawCounts results/raw_counts_10kb.tab \
+  --numberOfProcessors 4
 
-#sample 5
-bamCoverage \
-    -b 5.bam \
-    -o 5.bw \
-    --normalizeUsing CPM \
-    --binSize 25 \
-    --extendReads
 
-#sample 6
-bamCoverage \
-    -b 6.bam \
-    -o 6.bw \
-    --normalizeUsing CPM \
-    --binSize 25 \
-    --extendReads
 
-#sample 7
-bamCoverage \
-    -b 7.bam \
-    -o 7.bw \
-    --normalizeUsing CPM \
-    --binSize 25 \
-    --extendReads
 
-#sample 8
-bamCoverage \
-    -b 8.bam \
-    -o 8.bw \
-    --normalizeUsing CPM \
-    --binSize 25 \
-    --extendReads
+#multiBamSummary
+multiBamSummary bins \
+  --bamfiles *.bam \
+  --binSize 10000 \
+  --outFileName bam_summary.npz \
+  --outRawCounts raw_counts.tab
