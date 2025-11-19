@@ -19,32 +19,29 @@ bamCoverage \
     --binSize 25 \
     --extendReads
 
-#or all at once:
-mkdir -p bigwigs
-for b in sample*.bam; do
-  out=bigwigs/$(basename ${b%.bam}.bw)
-  bamCoverage -b $b -o $out \
-    --normalizeUsing CPM \
-    --binSize 50 \
-    --effectiveGenomeSize 2913022398 \
-    --extendReads --centerReads \
-    --numberOfProcessors 4
-done
+#make bed file
+awk 'BEGIN{OFS="\t"} $3=="gene"{print $1,$4-1,$5,$10}' BDGP6.54.115.gtf | sed 's/"//g; s/;//g' > genes.bed
 
-
-multiBamSummary bins \
+#summarise .bam files
+multiBamSummary BED-file \
   --bamfiles 1.bam 2.bam 3.bam 4.bam 5.bam 6.bam 7.bam 8.bam \
-  --binSize 10000 \
-  --outFileName results/bam_summary_10kb.npz \
-  --outRawCounts results/raw_counts_10kb.tab \
+  --BED genes.bed \
+  --outFileName bam_summary_genes.npz \
+  --outRawCounts raw_counts_genes.tab \
   --numberOfProcessors 4
 
+#plot a correlation map
+plotCorrelation \
+  -in bam_summary_genes.npz \
+  --corMethod spearman \
+  --whatToPlot heatmap \
+  --plotNumbers \
+  --colorMap Blues \
+  --zMin 0 --zMax 1 \
+  --plotTitle "Sample Correlation (Spearman, Blue)" \
+  -o correlation_heatmap_blue.png \
+  -o correlation_values_spearman.tab \
+  --removeOutliers
 
-
-
-#multiBamSummary
-multiBamSummary bins \
-  --bamfiles *.bam \
-  --binSize 10000 \
-  --outFileName bam_summary.npz \
-  --outRawCounts raw_counts.tab
+#plot PCA analysis
+plotPCA -in bam_summary_genes.npz -o pca_plot.png -T "PCA of samples"
