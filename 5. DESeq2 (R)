@@ -45,6 +45,10 @@ write.csv(count_data,
 saveRDS(count_data, file = "count_data.rds")
 count_data <- readRDS("count_data.rds")
 
+#optional things: filter data for low counts
+keep <- rowSums(count_data >= 2) >= 2  # keep if >=10 counts in at least 2 samples
+count_data_filtered <- count_data[keep, ]
+
 #-------------------------------run-first-DESeq2--------------------------------
 #metadata table, defining conditions
 sample_info <- data.frame(
