@@ -1,0 +1,274 @@
+#DESeq2 workflow for pupal-stage data on linux
+#this file is being created to keep the code specific to my file/directory names clean and easy to read/follow/reproduce
+
+#since we are on Linux, open R through miniconda 
+conda config --add channels defaults
+conda config --add channels bioconda
+conda config --add channels conda-forge
+
+#add all packages needed here before running R
+conda create -n rnaseq_full \
+  r-base \
+  bioconductor-deseq2 \
+  bioconductor-rsubread \
+  bioconductor-rtracklayer \
+  bioconductor-genomicfeatures \
+  bioconductor-rsamtools \
+  bioconductor-biomart \
+  bioconductor-clusterprofiler \
+  bioconductor-org.dm.eg.db \
+  bioconductor-apeglm \
+  r-ggplot2 \
+  r-dplyr \
+  r-pheatmap \
+  r-ggrepel \
+  r-openxlsx
+
+#call R
+conda activate rnaseq
+rstudio
+
+#this launches RStudio, continue here
+#to install more packages later on
+conda install -n rnaseq r-extra_package 
+
+#------------------------------required packages--------------------------------
+#load the following packages in R
+library(Rsubread)
+library(GenomicFeatures)
+library(Rsamtools)
+library(DESeq2)
+library(biomaRt)
+library(pheatmap)
+library(clusterProfiler)
+library(org.Dm.eg.db)
+library(openxlsx)
+library(ggplot2)
+library(dplyr)
+library(ggrepel)
+library(RColorBrewer)
+library(apeglm)
+
+#----------------------------------input-data-----------------------------------
+#now we can start with the data analysis
+#first specify directory and verify existence of .bam files
+bam_dir <- "/home/flylab-ubuntu/RNASeq/RNAEmily/star_output"
+bam_files <- file.path(bam_dir, paste0(1:8, ".bam"))
+file.exists(bam_files) #should return TRUE x8
+
+#find annotation file in your files, should have been downloaded to use STAR
+annotation_file <- "/home/flylab-ubuntu/RNASeq/RNAEmily/star_index/Drosophila_melanogaster.BDGP6.54.115.gtf"
+
+#optional: check if annotation file matches BAM files
+gtf <- rtracklayer::import(annotation_file)
+seqlevels(gtf)  
+bam_header <- scanBamHeader(bam_files[1])
+names(bam_header[[1]]$targets)  
+
+#read counting (this may take a while)
+counts <- featureCounts(bam_files, annot.ext = annotation_file, isGTFAnnotationFile = TRUE, isPairedEnd = TRUE)
+count_data <- counts$counts
+
+#filter out zeros
+keep <- rowSums(count_data >= 8) >= 2  
+count_data_filtered <- count_data[keep, ]
+
+#save and load if needed
+saveRDS(count_data, file = "count_data.rds")
+count_data <- readRDS("count_data.rds")
+saveRDS(count_data_filtered, file = "count_data_filtered.rds")
+count_data_filtered <- readRDS("count_data_filtered.rds")
+
+#------------------------------Quality-Controls---------------------------------
+#now proceed with QC
+
+#metadata for 8 samples, define conditions
+colData <- data.frame(
+  sample = colnames(count_data_filtered),
+  condition = factor(c("GEPD","GEPD","GEPD","GEPD","control","control","control","control"))
+)
+
+#create DESeq data set
+dds <- DESeqDataSetFromMatrix(
+  countData = count_data_filtered,
+  colData = colData,
+  design = ~ condition
+)
+
+#transform for visualisation
+#vst transformation
+vsd <- vst(dds, blind=TRUE)
+
+#PCA plot
+percentVar <- round(100 * attr(pcaData, "percentVar"))
+#add sample names
+pcaData$sample <- rownames(pcaData)
+ggplot(pcaData, aes(x = PC1, y = PC2, color = condition, label = sample)) +
+  geom_point(size = 4) +
+  geom_text_repel(size = 4, show.legend = FALSE) +
+  xlab(paste0("PC1: ", percentVar[1], "% variance")) +
+  ylab(paste0("PC2: ", percentVar[2], "% variance")) +
+  ggtitle("PCA of RNA-seq samples") +
+  theme_bw() +
+  theme(plot.title = element_text(hjust = 0.5))
+#save as 'PCA plot pre outlier removal'
+
+#sample distances
+sampleDists <- dist(t(assay(vsd)))
+sampleDistMatrix <- as.matrix(sampleDists)
+colors <- colorRampPalette(rev(brewer.pal(11, "RdBu")))(255)
+pheatmap(sampleDistMatrix,
+         color = colors,
+         display_numbers = TRUE,
+         number_color = "black")
+#save as 'sample distances heatmap pre outlier removal'
+
+#dispersion estimates 
+plotDispEsts(dds)
+#save as 'Dispersion Plot pre outlier removal'
+
+#inspect PCA plot and heatmap, identify potential outliers via clustering
+
+#remove desired outliers
+count_data_filtered <- count_data_filtered[, colnames(count_data_filtered) != "6.bam"]
+colData <- colData[colData$sample != "6.bam", ]
+
+#compute the dds object again after removing the outlier(s)
+dds <- DESeqDataSetFromMatrix(countData = count_data_filtered,
+                              colData = colData,
+                              design = ~ condition)
+dds <- DESeq(dds)
+
+#repeat the steps from above for QC after outlier removal, assess with no further outlier are present
+#vst transformation
+vsd <- vst(dds, blind=TRUE)
+
+#PCA plot post outlier removal
+percentVar <- round(100 * attr(pcaData, "percentVar"))
+#add sample names
+pcaData$sample <- rownames(pcaData)
+ggplot(pcaData, aes(x = PC1, y = PC2, color = condition, label = sample)) +
+  geom_point(size = 4) +
+  geom_text_repel(size = 4, show.legend = FALSE) +
+  xlab(paste0("PC1: ", percentVar[1], "% variance")) +
+  ylab(paste0("PC2: ", percentVar[2], "% variance")) +
+  ggtitle("PCA of RNA-seq samples") +
+  theme_bw() +
+  theme(plot.title = element_text(hjust = 0.5))
+#save as 'PCA plot post outlier removal'
+
+#sample distances
+sampleDists <- dist(t(assay(vsd)))
+sampleDistMatrix <- as.matrix(sampleDists)
+colors <- colorRampPalette(rev(brewer.pal(11, "RdBu")))(255)
+pheatmap(sampleDistMatrix,
+         color = colors,
+         display_numbers = TRUE,
+         number_color = "black")
+#save as 'sample distances heatmap post outlier removal'
+
+#dispersion estimates
+plotDispEsts(dds)
+#save as 'Dispersion Plot post outlier removal'
+
+
+#--------------------------Differential-Gene-Expression-------------------------
+#now start DGE analysis
+res <- results(dds, contrast=c("condition", "GEPD", "control"))
+
+#remove transposable elements (TEs), they start with FBti or RR
+res <- res[!grepl("^FBti|^RR", rownames(res)), ]
+#save file to folder
+write.csv(as.data.frame(res), "DEGs.csv")
+
+#keep TEs separate for later analysis
+res_TEs <- res[grepl("^FBti|^RR", rownames(res)), ]
+write.csv(as.data.frame(res_TEs), "DEGs_TEs.csv")
+
+#now filter for significant DEGs
+res_sig <- res[which(res$padj < 0.05), ]
+res_up <- res_sig[res_sig$log2FoldChange > 0, ]
+res_down <- res_sig[res_sig$log2FoldChange < 0, ]
+
+#inspect gene numbers and keep note of this somewhere
+#note: do not use the function summary, as it automatically sets another significance threshold on top
+nrow(res_sig)  
+up <- sum(res_sig$log2FoldChange > 0)
+down <- sum(res_sig$log2FoldChange < 0)
+cat("Upregulated genes:", up, "\n")
+cat("Downregulated genes:", down, "\n")
+
+#save files 
+write.csv(res_up, "DEGs_up.csv")
+write.csv(res_down, "DEGs_down.csv")
+
+#-------------------------------------visualisation-----------------------------
+#the following section will create volcano plots, MA plots, heatmaps of top DEGs
+#use res (and not res_sig) for volcano plots to display all DEGs
+
+#volcano plot
+res$gene <- rownames(res)
+res$significant <- ifelse(res_shrink$padj < 0.05 & abs(res_shrink$log2FoldChange) >= 1, "yes", "no")
+#convert to data frame
+volcano_df <- as.data.frame(res)
+#specify significance levels
+volcano_df <- volcano_df %>%
+  mutate(significance = case_when(
+    padj < 0.01 & abs(log2FoldChange) > 1 ~ "highly significant",
+    padj < 0.05 ~ "padj < 0.05",
+    TRUE ~ "not significant"
+  ))
+#gene names
+volcano_df$gene <- rownames(volcano_df)
+#label top 15 genes
+top_n_genes <- 15
+top_genes <- volcano_df %>%
+  filter(significance != "not significant") %>%
+  arrange(padj) %>%
+  slice(1:top_n_genes)
+
+volcano_plot <- ggplot(volcano_df, aes(x = log2FoldChange, y = -log10(padj))) +
+  geom_point(aes(color = significance), alpha = 0.6, size = 2) +
+  scale_color_manual(values = c("highly significant" = "#E41A1C",
+                                "padj < 0.05" = "#377EB8",
+                                "not significant" = "grey")) +
+  theme_minimal(base_size = 14) +
+  labs(title = "Volcano Plot of DE Genes",
+       x = "Log2 Fold Change",
+       y = "-Log10 Adjusted P-value",
+       color = "Significance") +
+  geom_vline(xintercept = c(-1,1), linetype="dashed", color="black") +
+  geom_hline(yintercept = -log10(0.1), linetype="dashed", color="black") +
+  coord_cartesian(xlim = c(-8,8), ylim = c(0,30))  # THIS CAPS THE AXES
+print(volcano_plot)
+
+#MA plot
+plotMA(res, ylim=c(-5,5))
+
+#heatmaps of top DEGs
+#for all significant DEGs
+top_genes <- head(rownames(res_sig[order(res_sig$padj), ]), 50)
+pheatmap(assay(vsd)[top_genes, ], scale="row", annotation_col=colData)
+
+#split for up- and downregulated DEGs
+top_up <- head(rownames(res_up[order(res_up$padj), ]), 50)
+pheatmap(assay(vsd)[top_up, ], scale="row", annotation_col=colData)
+
+top_down <- head(rownames(res_down[order(res_down$padj), ]), 50)
+pheatmap(assay(vsd)[top_down, ], scale="row", annotation_col=colData)
+
+#optional: expression plots for single genes
+plotCounts(dds, gene="FBgnXXXX", intgroup="condition")
+
+#some advanced options:
+#look for groups of genes that show similar expression patterns across samples
+top_genes <- head(rownames(res_sig[order(res_sig$padj), ]), 100)
+pheatmap(assay(vsd)[top_genes, ], scale="row")
+
+#gene outlier detection using cook's distance to identify genes where a single sample drives extreme expression
+cooks <- assays(dds)[["cooks"]]
+head(cooks)
+
+
+
+
