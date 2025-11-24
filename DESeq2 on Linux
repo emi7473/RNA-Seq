@@ -270,5 +270,77 @@ cooks <- assays(dds)[["cooks"]]
 head(cooks)
 
 
+#---------------------------------------GO-Term---------------------------------
+res_sig <- res %>%
+  as.data.frame() %>%
+  filter(padj < 0.05)  
+res_sig$gene <- rownames(res_sig)
+
+#annotate with real gene names
+library(clusterProfiler)
+library(org.Dm.eg.db)
+
+gene_conversion <- bitr(res_sig$gene,
+                        fromType = "FLYBASE",
+                        toType = "ENTREZID",
+                        OrgDb = org.Dm.eg.db)
+
+#merge conversion with DE table
+res_sig <- merge(res_sig, gene_conversion,
+                 by.x = "gene", by.y = "FLYBASE")
+
+#now run GO Term analysis
+#upregulated DEGs
+genes_up <- res_sig %>% filter(log2FoldChange > 0) %>% pull(ENTREZID)
+ego_up <- enrichGO(gene = genes_up,
+                   OrgDb = org.Dm.eg.db,
+                   keyType = "ENTREZID",
+                   ont = "BP",
+                   pvalueCutoff = 0.05)
+
+#downregulated DEGs
+genes_down <- res_sig %>% filter(log2FoldChange < 0) %>% pull(ENTREZID)
+ego_down <- enrichGO(gene = genes_down,
+                     OrgDb = org.Dm.eg.db,
+                     keyType = "ENTREZID",
+                     ont = "BP",
+                     pvalueCutoff = 0.05)
+
+#plot results
+dotplot(ego_up, showCategory = 15) + ggtitle("GO (Upregulated)")
+dotplot(ego_down, showCategory = 15) + ggtitle("GO (Downregulated)")
+
+#export results in table
+library(openxlsx)
+
+# Save all significant GO terms for upregulated genes
+write.xlsx(as.data.frame(ego_up), 
+           file = "GO_results_upregulated.xlsx", 
+           rowNames = FALSE)
+
+# Save all significant GO terms for downregulated genes
+write.xlsx(as.data.frame(ego_down), 
+           file = "GO_results_downregulated.xlsx", 
+           rowNames = FALSE)
+write.csv(as.data.frame(ego_up), "GO_upregulated.csv", row.names = FALSE)
+write.csv(as.data.frame(ego_down), "GO_downregulated.csv", row.names = FALSE)
+
+#also export gene lists
+ego_up_long <- ego_up@result %>%
+  tidyr::separate_rows(geneID, sep = "/")
+ego_down_long <- ego_down@result %>%
+  tidyr::separate_rows(geneID, sep = "/")
+write.xlsx(ego_up_long, "GO_upregulated_each_gene.xlsx")
+write.xlsx(ego_down_long, "GO_downregulated_each_gene.xlsx")
+write.xlsx(data.frame(ENTREZID = genes_up), "Upregulated_gene_list.xlsx")
+write.xlsx(data.frame(ENTREZID = genes_down), "Downregulated_gene_list.xlsx")
+
+
+
+
+
+
+
+
 
 
