@@ -289,58 +289,151 @@ gene_conversion <- bitr(res_sig$gene,
 res_sig <- merge(res_sig, gene_conversion,
                  by.x = "gene", by.y = "FLYBASE")
 
+#split gene sets
+all_genes <- rownames(res_sig)
+up_genes <- rownames(res_sig[res_sig$log2FoldChange > 0, ])
+down_genes <- rownames(res_sig[res_sig$log2FoldChange < 0, ])
+
+#map entrez ids to gene sets
+all_entrez <- bitr(all_genes, fromType = "FLYBASE",
+                   toType = "ENTREZID", OrgDb = org.Dm.eg.db)
+up_entrez <- bitr(up_genes, fromType = "FLYBASE",
+                  toType = "ENTREZID", OrgDb = org.Dm.eg.db)
+down_entrez <- bitr(down_genes, fromType = "FLYBASE",
+                    toType = "ENTREZID", OrgDb = org.Dm.eg.db)
+head(all_entrez)
+
+
 #now run GO Term analysis
-#upregulated DEGs
-genes_up <- res_sig %>% filter(log2FoldChange > 0) %>% pull(ENTREZID)
-ego_up <- enrichGO(gene = genes_up,
-                   OrgDb = org.Dm.eg.db,
-                   keyType = "ENTREZID",
-                   ont = "BP",
-                   pvalueCutoff = 0.05)
+#for all DEGs
+ego_all <- enrichGO(
+    gene = all_entrez$ENTREZID,
+    OrgDb = org.Dm.eg.db,
+    keyType = "ENTREZID",
+    ont = "BP",
+    pAdjustMethod = "BH",
+    pvalueCutoff = 0.1,
+    readable = TRUE
+)
 
-#downregulated DEGs
-genes_down <- res_sig %>% filter(log2FoldChange < 0) %>% pull(ENTREZID)
-ego_down <- enrichGO(gene = genes_down,
-                     OrgDb = org.Dm.eg.db,
-                     keyType = "ENTREZID",
-                     ont = "BP",
-                     pvalueCutoff = 0.05)
+#for upregulated DEGs
+ego_up <- enrichGO(
+    gene = up_entrez$ENTREZID,
+    OrgDb = org.Dm.eg.db,
+    keyType = "ENTREZID",
+    ont = "BP",
+    pAdjustMethod = "BH",
+    pvalueCutoff = 0.1,
+    readable = TRUE
+)
 
-#plot results
-dotplot(ego_up, showCategory = 15) + ggtitle("GO (Upregulated)")
-dotplot(ego_down, showCategory = 15) + ggtitle("GO (Downregulated)")
+#for downregulated DEGs
+ego_down <- enrichGO(
+    gene = down_entrez$ENTREZID,
+    OrgDb = org.Dm.eg.db,
+    keyType = "ENTREZID",
+    ont = "BP",
+    pAdjustMethod = "BH",
+    pvalueCutoff = 0.1,
+    readable = TRUE
+)
 
-#export results in table
-library(openxlsx)
+#filter GO Terms by specific keywords for each theme
+#metabolism
+keywords_metabolism <- c(
+  "metabol",      # metabolism, metabolic
+  "glycol",       # glycolysis
+  "lipid",        # lipid metabolism
+  "fatty acid",
+  "carbohydrate",
+  "amino acid",
+  "energy",
+  "catabol",      # catabolism
+  "anabol"        # anabolism
+)
+metabolism_regex <- paste(keywords_metabolism, collapse = "|")
+#immune
+keywords_immune <- c(
+  "immune",
+  "defense",
+  "response to bacter",  # bacterial response
+  "response to virus",
+  "inflamm",
+  "Toll",
+  "IMD",
+  "antimicrob"          # antimicrobial peptides
+)
+immune_regex <- paste(keywords_immune, collapse = "|")
 
-# Save all significant GO terms for upregulated genes
-write.xlsx(as.data.frame(ego_up), 
-           file = "GO_results_upregulated.xlsx", 
-           rowNames = FALSE)
+#oxidative stress
+keywords_oxidative <- c(
+  "oxidative",
+  "ROS",
+  "reactive oxygen",
+  "redox",
+  "peroxid",
+  "superoxide",
+  "antioxidant"
+)
+oxidative_regex <- paste(keywords_oxidative, collapse = "|")
 
-# Save all significant GO terms for downregulated genes
-write.xlsx(as.data.frame(ego_down), 
-           file = "GO_results_downregulated.xlsx", 
-           rowNames = FALSE)
-write.csv(as.data.frame(ego_up), "GO_upregulated.csv", row.names = FALSE)
-write.csv(as.data.frame(ego_down), "GO_downregulated.csv", row.names = FALSE)
+#upregulated metabolism
+ego_up_metabolism <- ego_up@result %>%
+  filter(grepl(metabolism_regex, Description, ignore.case = TRUE))
+#upregulated immune
+ego_up_immune <- ego_up@result %>%
+  filter(grepl(immune_regex, Description, ignore.case = TRUE))
+#upregulated oxidative stress
+ego_up_oxidative <- ego_up@result %>%
+  filter(grepl(oxidative_regex, Description, ignore.case = TRUE))
 
-#also export gene lists
-ego_up_long <- ego_up@result %>%
-  tidyr::separate_rows(geneID, sep = "/")
-ego_down_long <- ego_down@result %>%
-  tidyr::separate_rows(geneID, sep = "/")
-write.xlsx(ego_up_long, "GO_upregulated_each_gene.xlsx")
-write.xlsx(ego_down_long, "GO_downregulated_each_gene.xlsx")
-write.xlsx(data.frame(ENTREZID = genes_up), "Upregulated_gene_list.xlsx")
-write.xlsx(data.frame(ENTREZID = genes_down), "Downregulated_gene_list.xlsx")
+#downregulated metabolism
+ego_down_metabolism <- ego_down@result %>%
+  filter(grepl(metabolism_regex, Description, ignore.case = TRUE))
+ego_down_immune <- ego_down@result %>%
+  filter(grepl(immune_regex, Description, ignore.case = TRUE))
+ego_down_oxidative <- ego_down@result %>%
+  filter(grepl(oxidative_regex, Description, ignore.case = TRUE))
 
+#visualise
+#upregulated metabolism 
+ggplot(ego_up_metabolism, aes(x = reorder(Description, -p.adjust), y = -log10(p.adjust))) +
+  geom_bar(stat = "identity", fill = "#E41A1C") +
+  coord_flip() +
+  theme_bw() +
+  labs(y = "-log10(FDR)", x = "GO Term", title = "Upregulated Metabolism GO Terms")
+ggplot(ego_up_metabolism, aes(x = Count, y = -log10(p.adjust), size = Count)) +
+  geom_point(color = "#E41A1C", alpha = 0.7) +
+  geom_text(aes(label = Description), check_overlap = TRUE, hjust = 0.5) +
+  theme_bw() +
+  labs(x = "Gene Count", y = "-log10(FDR)", title = "Upregulated Metabolism GO Term Enrichment")
 
+#upregulated immune 
+ggplot(ego_up_immune, aes(x = reorder(Description, -p.adjust), y = -log10(p.adjust))) +
+  geom_bar(stat = "identity", fill = "#E41A1C") +
+  coord_flip() +
+  theme_bw() +
+  labs(y = "-log10(FDR)", x = "GO Term", title = "Upregulated Immune GO Terms")
+ggplot(ego_up_immune, aes(x = Count, y = -log10(p.adjust), size = Count)) +
+  geom_point(color = "#E41A1C", alpha = 0.7) +
+  geom_text(aes(label = Description), check_overlap = TRUE, hjust = 0.5) +
+  theme_bw() +
+  labs(x = "Gene Count", y = "-log10(FDR)", title = "Upregulated Immune GO Term Enrichment")
 
+#upregulated oxidative 
+ggplot(ego_up_oxidative, aes(x = reorder(Description, -p.adjust), y = -log10(p.adjust))) +
+  geom_bar(stat = "identity", fill = "#E41A1C") +
+  coord_flip() +
+  theme_bw() +
+  labs(y = "-log10(FDR)", x = "GO Term", title = "Upregulated Oxidative GO Terms")
+ggplot(ego_up_oxidative, aes(x = Count, y = -log10(p.adjust), size = Count)) +
+  geom_point(color = "#E41A1C", alpha = 0.7) +
+  geom_text(aes(label = Description), check_overlap = TRUE, hjust = 0.5) +
+  theme_bw() +
+  labs(x = "Gene Count", y = "-log10(FDR)", title = "Upregulated Oxidative GO Term Enrichment")
 
-
-
-
-
-
-
+#export
+write.csv(ego_up_metabolism, "GO_Up_Metabolism.csv", row.names = FALSE)
+write.csv(ego_up_immune, "GO_Up_Immune.csv", row.names = FALSE)
+write.csv(ego_up_oxidative, "GO_Up_Oxidative.csv", row.names = FALSE)
+write.csv(ego_down_metabolism, "GO_Down_Metabolism.csv", row.names = FALSE)
