@@ -352,16 +352,28 @@ keywords_metabolism <- c(
   "anabol"        # anabolism
 )
 metabolism_regex <- paste(keywords_metabolism, collapse = "|")
+
 #immune
 keywords_immune <- c(
   "immune",
   "defense",
-  "response to bacter",  # bacterial response
+  "response to bacter",
   "response to virus",
   "inflamm",
   "Toll",
   "IMD",
-  "antimicrob"          # antimicrobial peptides
+  "antimicrob",
+  "cytokine",
+  "chemokine",
+  "interfer",
+  "interleukin",
+  "lymphocyte",
+  "leukocyte",
+  "phagocyt",
+  "antigen",
+  "complement",
+  "adaptive",
+  "innate"
 )
 immune_regex <- paste(keywords_immune, collapse = "|")
 
