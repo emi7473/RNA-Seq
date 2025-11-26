@@ -338,8 +338,7 @@ ego_down <- enrichGO(
 )
 
 
-
-#----------------------------------------------------------------------
+#---------------------------------Specialised-GO-Term---------------------------
 #filter GO Terms by specific keywords for each theme
 library(dplyr)
 library(GO.db)
@@ -349,12 +348,17 @@ metabolism_root <- "GO:0008152"
 metabolism_descendants <- unique(unlist(GOBPOFFSPRING[[metabolism_root]]))
 metabolism_go_ids <- c(metabolism_root, metabolism_descendants)
 
-#upregulated genes
+#all DEGs
+ego_all_metabolism <- ego_all@result %>%
+  filter(ID %in% metabolism_go_ids) %>%
+  filter(Count >= 3)
+
+#upregulated DEGs
 ego_up_metabolism <- ego_up@result %>%
   filter(ID %in% metabolism_go_ids) %>%
   filter(Count >= 3)
 
-#downregulated genes
+#downregulated DEGs
 ego_down_metabolism <- ego_down@result %>%
   filter(ID %in% metabolism_go_ids) %>%
   filter(Count >= 3)
@@ -364,12 +368,17 @@ immune_root <- "GO:0002376"
 immune_descendants <- unique(unlist(GOBPOFFSPRING[[immune_root]]))
 immune_go_ids <- c(immune_root, immune_descendants)
 
-#upregulated genes
+#all DEGs
+ego_all_immune <- ego_all@result %>%
+  filter(ID %in% immune_go_ids) %>%
+  filter(Count >= 3)
+
+#upregulated DEGs
 ego_up_immune <- ego_up@result %>%
   filter(ID %in% immune_go_ids) %>%
   filter(Count >= 3)
 
-#downregulated genes
+#downregulated DEGs
 ego_down_immune <- ego_down@result %>%
   filter(ID %in% immune_go_ids) %>%
   filter(Count >= 3)
@@ -379,19 +388,23 @@ oxstress_root <- "GO:0006979"
 oxstress_descendants <- unique(unlist(GOBPOFFSPRING[[oxstress_root]]))
 oxstress_go_ids <- c(oxstress_root, oxstress_descendants)
 
-#upregulated genes
+#all DEGs
+ego_all_oxstress <- ego_all@result %>%
+  filter(ID %in% oxstress_go_ids) %>%
+  filter(Count >= 3)
+
+#upregulated DEGs
 ego_up_oxstress <- ego_up@result %>%
   filter(ID %in% oxstress_go_ids) %>%
   filter(Count >= 3)
 
-#downregulated genes
+#downregulated DEGs
 ego_down_oxstress <- ego_down@result %>%
   filter(ID %in% oxstress_go_ids) %>%
   filter(Count >= 3)
 
 
-
-
+#---------------------------------Visualise-GO-Term-----------------------------
 
 
 
