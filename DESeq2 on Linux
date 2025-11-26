@@ -303,7 +303,6 @@ down_entrez <- bitr(down_genes, fromType = "FLYBASE",
                     toType = "ENTREZID", OrgDb = org.Dm.eg.db)
 head(all_entrez)
 
-
 #now run GO Term analysis
 #for all DEGs
 ego_all <- enrichGO(
@@ -337,6 +336,73 @@ ego_down <- enrichGO(
     pvalueCutoff = 0.1,
     readable = TRUE
 )
+
+
+
+#----------------------------------------------------------------------
+#filter GO Terms by specific keywords for each theme
+library(dplyr)
+library(GO.db)
+
+#metabolism
+metabolism_root <- "GO:0008152"
+metabolism_descendants <- unique(unlist(GOBPOFFSPRING[[metabolism_root]]))
+metabolism_go_ids <- c(metabolism_root, metabolism_descendants)
+
+#upregulated genes
+ego_up_metabolism <- ego_up@result %>%
+  filter(ID %in% metabolism_go_ids) %>%
+  filter(Count >= 3)
+
+#downregulated genes
+ego_down_metabolism <- ego_down@result %>%
+  filter(ID %in% metabolism_go_ids) %>%
+  filter(Count >= 3)
+
+#immune
+immune_root <- "GO:0002376"
+immune_descendants <- unique(unlist(GOBPOFFSPRING[[immune_root]]))
+immune_go_ids <- c(immune_root, immune_descendants)
+
+#upregulated genes
+ego_up_immune <- ego_up@result %>%
+  filter(ID %in% immune_go_ids) %>%
+  filter(Count >= 3)
+
+#downregulated genes
+ego_down_immune <- ego_down@result %>%
+  filter(ID %in% immune_go_ids) %>%
+  filter(Count >= 3)
+
+#oxidative stress
+oxstress_root <- "GO:0006979"
+oxstress_descendants <- unique(unlist(GOBPOFFSPRING[[oxstress_root]]))
+oxstress_go_ids <- c(oxstress_root, oxstress_descendants)
+
+#upregulated genes
+ego_up_oxstress <- ego_up@result %>%
+  filter(ID %in% oxstress_go_ids) %>%
+  filter(Count >= 3)
+
+#downregulated genes
+ego_down_oxstress <- ego_down@result %>%
+  filter(ID %in% oxstress_go_ids) %>%
+  filter(Count >= 3)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 #filter GO Terms by specific keywords for each theme
 #metabolism
