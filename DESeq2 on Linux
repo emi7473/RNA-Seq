@@ -404,7 +404,39 @@ ego_down_oxstress <- ego_down@result %>%
   filter(Count >= 3)
 
 
-#---------------------------------Visualise-GO-Term-----------------------------
+#--------------------------------Background-GO-Term-----------------------------
+#background genes 
+background_genes <- rownames(count_data_filtered)  
+
+#convert to Entrez IDs
+background_genes_entrez <- bitr(background_genes,
+                                fromType = "FLYBASE",
+                                toType = "ENTREZID",
+                                OrgDb = org.Dm.eg.db)$ENTREZID
+
+#upregulated genes
+ego_up <- enrichGO(
+  gene = up_genes,
+  OrgDb = org.Dm.eg.db,
+  keyType = "ENTREZID",
+  ont = "BP",
+  universe = background_genes_entrez,  
+  pAdjustMethod = "BH",
+  pvalueCutoff = 0.1,
+  qvalueCutoff = 0.2
+)
+
+#downregulated genes
+ego_down <- enrichGO(
+  gene = down_genes,
+  OrgDb = org.Dm.eg.db,
+  keyType = "ENTREZID",
+  ont = "BP",
+  universe = background_genes_entrez, 
+  pAdjustMethod = "BH",
+  pvalueCutoff = 0.1,
+  qvalueCutoff = 0.2
+)
 
 
 
