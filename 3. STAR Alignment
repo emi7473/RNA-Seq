@@ -42,3 +42,13 @@ STAR \
   --genomeFastaFiles GRCm38.primary_assembly.genome.fa \
   --sjdbGTFfile gencode.vM25.basic.annotation.gtf \
   --sjdbOverhang 149
+
+
+STAR \
+  --runThreadN 2 \
+  --runMode genomeGenerate \
+  --genomeDir ./mm10_STAR_index \
+  --genomeFastaFiles GRCm38.primary_assembly.genome.fa \
+  --sjdbGTFfile gencode.vM25.basic.annotation.gtf \
+  --sjdbOverhang 149 \
+  --limitGenomeGenerateRAM 30000000000
