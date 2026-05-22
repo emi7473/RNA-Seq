@@ -31,3 +31,14 @@ STAR --runThreadN 8 --genomeDir ./dmel_genome_index --readFilesIn 7_R1_001_trimm
 
 #sample 8
 STAR --runThreadN 8 --genomeDir ./dmel_genome_index --readFilesIn 8_R1_001_trimmed_paired.fastq.gz 8_R2_001_trimmed_paired.fastq.gz --readFilesCommand zcat --outFileNamePrefix 8_ --outSAMtype BAM SortedByCoordinate
+
+
+#for mouse data:
+
+STAR \
+  --runThreadN 8 \
+  --runMode genomeGenerate \
+  --genomeDir ./mm10_STAR_index \
+  --genomeFastaFiles GRCm38.primary_assembly.genome.fa \
+  --sjdbGTFfile gencode.vM25.basic.annotation.gtf \
+  --sjdbOverhang 149
