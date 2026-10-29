@@ -1,5 +1,3 @@
-#author's note: this can be copied directly into R for use :)
-
 #------------------------------required packages--------------------------------
 if (!requireNamespace("BiocManager", quietly = TRUE))
   install.packages("BiocManager")
